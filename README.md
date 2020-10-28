@@ -51,3 +51,7 @@ onComplete or onError 두가지 타입만 처리
 3. 메이비: 어떠한 값의 반환 없이 완료,실패 할 수 있는 행위를 의미, 아이템반환x  
 
 
+## Chapter 03  
+2020-10-29  
+yahoo 대신 aws 서버 api  
+retrofit2  
