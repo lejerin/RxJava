@@ -3,11 +3,14 @@ package com.example.rxjava;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.room.Room;
 
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.LinearLayout;
 
+import com.example.rxjava.data.AppDatabase;
+import com.example.rxjava.data.StockUpdateRoom;
 import com.example.rxjava.databinding.ActivityMainBinding;
 
 import java.util.Date;
@@ -39,12 +42,15 @@ public class MainActivity extends AppCompatActivity {
         stockDataAdapter = new StockDataAdapter();
         binding.recyclerview.setAdapter(stockDataAdapter);
 
+
+
         YahooService yahooService = new RetrofitYahooServiceFactory().create();
         yahooService.yqlQuery()
                 .subscribeOn(Schedulers.io())
                 .toObservable()
                 .flatMap(r -> Observable.fromIterable(r))
                 .map(r -> StockUpdate.create(r))
+                .doOnNext(this::saveStockUpdate)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(stockUpdate -> {
                     Log.d("app", "new update " + stockUpdate.toString());
@@ -66,4 +72,18 @@ public class MainActivity extends AppCompatActivity {
 //        ).subscribe(stockDataAdapter::add);
 
     }
+
+    private void saveStockUpdate(StockUpdate stockUpdate) {
+
+        StockUpdateRoom stockUpdateRoom = new StockUpdateRoom();
+        stockUpdateRoom.setSTOCK_SYMBOL(stockUpdate.getStockSymbol());
+        stockUpdateRoom.setPRICE(stockUpdate.getPrice().toString());
+        stockUpdateRoom.setDATE(stockUpdate.getDate().toString());
+
+        Log.d("app", stockUpdateRoom.getSTOCK_SYMBOL());
+        AppDatabase.getInstance(this).stockUpdateDao()
+                .insert(stockUpdateRoom)
+                .subscribe();
+    }
+
 }
