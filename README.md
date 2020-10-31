@@ -77,5 +77,13 @@ IO: 가장 많이 사용하는 스케줄러, 네트워크 요청, 파일시스�
 2. .subscribeOn() 바로 앞에 observeOn()을 배치하자!  
 
 코드는 동기적으로 실행되지만 코드가 다른 스레드에서 실행된다면 정의된 순서에 따라 실행된다.  
+StorIO 대신 Room 사용  
+
+## Chapter 06  
+2020-10-31  
+RxJava 예외 처리 방법  
+onExceptionResumeNext(), doOnError()를 사용한 오류 처리 방법  
+예외 로깅 중앙 집중화 방법  
+db에서 데이터 읽어오기  
 
 
