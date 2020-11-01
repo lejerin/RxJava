@@ -80,9 +80,38 @@ IO: 가장 많이 사용하는 스케줄러, 네트워크 요청, 파일시스�
 StorIO 대신 Room 사용  
 
 ## Chapter 06  
-2020-10-31  
+2020-11-01  
 RxJava 예외 처리 방법  
-onExceptionResumeNext(), doOnError()를 사용한 오류 처리 방법  
+.subscrive() 메소드는 옵저버블 또는 연산자가 던진 예외를 처리하는 데 이용하는 추가 인수를 사용한다  
+Observable.just("one")
+          .doOnNext(i -> {
+                    throw new RuntimeException();
+           })
+           .subscribe(item -> {
+                    log("subscribe", item);
+            }, throwable -> {
+                    log(throwable);
+            });  
+이와 같이 두 번째 인수를 사용하여 예외 처리  
+
+onExceptionResumeNext()를 사용한 오류 처리 방법  
+onExceptionResumeNext(): 예외 발생 후 다른 옵저버블에서 흐름 처리를 복원하는 좋은 방법, 원본이 실패한 경우 백업 옵저버블에 플러그인하는 매커니즘으로 사용 가능  
+Observable.<String>(new RuntimeException("Crash!"))
+          .onExceptionResumeNext(Observable.just("second"))
+          .subscribe(item -> {
+                    log("subscribe", item);
+          }, e -> log("subscribe",e));  
+  
+doOnError()를 사용한 오류 처리 방법 : .subscribe() 에 아직 도달하지 않은 오류를 가로채기 위해 사용한다.  
+Observable.<String>(new RuntimeException("Crash!"))
+          .doOnError(e -> log("doOnNext",e))
+          .onExceptionResumeNext(Observable.just("second"))
+          .subscribe(item -> {
+                    log("subscribe", item);
+          }, e -> log("subscribe",e));  
+  
+그 외 기타 오휴 처리 방법: onErrorResumeNext(), onErrorReturn(), onErrorEeturnItem()  
+
 예외 로깅 중앙 집중화 방법  
 db에서 데이터 읽어오기  
 
