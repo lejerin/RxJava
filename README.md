@@ -113,6 +113,8 @@ Observable.<String>(new RuntimeException("Crash!"))
 그 외 기타 오휴 처리 방법: onErrorResumeNext(), onErrorReturn(), onErrorEeturnItem()  
 
 예외 로깅 중앙 집중화 방법  
+중앙 처리기: 일반적인 예외 처리가 필요한 장소에서 재사용되는 핸들러를 사용하는 것  
+RxJava 플러그인 사용: RxJavaPlugins.setErrorHandler(...);  
 db에서 데이터 읽어오기  
 
 
