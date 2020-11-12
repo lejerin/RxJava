@@ -8,12 +8,14 @@ import androidx.room.Room;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.example.rxjava.data.AppDatabase;
 import com.example.rxjava.data.StockUpdateRoom;
 import com.example.rxjava.databinding.ActivityMainBinding;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
@@ -45,17 +47,80 @@ public class MainActivity extends AppCompatActivity {
 
 
         YahooService yahooService = new RetrofitYahooServiceFactory().create();
-        yahooService.yqlQuery()
+//                Observable.interval(0, 5, TimeUnit.SECONDS)
+//                .flatMap(
+//                        i -> Observable.<YahooStockResult>error(new
+//                                RuntimeException("Oops"))
+//                )
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .doOnError(error -> {
+//                    Log.d("app", "doOnError ");
+//                    Toast.makeText(this, "error", Toast.LENGTH_LONG).show();
+//                })
+//                .observeOn(Schedulers.io())
+//                .map(r -> r.getResults().getQuote())
+//                .flatMap(r -> Observable.fromIterable(r))
+//                .map(r -> StockUpdate.create(r))
+//                .doOnNext(this::saveStockUpdate)
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(stockUpdate -> {
+//                    Log.d("app", "new update " + stockUpdate.toString());
+//                    stockDataAdapter.add(stockUpdate);
+//                });
+
+//        yahooService.yqlQuery()
+//                .subscribeOn(Schedulers.io())
+//                .toObservable()
+//                .flatMap(r -> Observable.fromIterable(r))
+//                .map(r -> StockUpdate.create(r))
+//                .doOnNext(this::saveStockUpdate)
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(stockUpdate -> {
+//                    Log.d("app", "new update " + stockUpdate.toString());
+//                    stockDataAdapter.add(stockUpdate);
+//                });
+
+        Observable.interval(0, 5, TimeUnit.SECONDS)
+                .flatMap(
+                        i -> Observable.<YahooStockResult>error(new RuntimeException("Crash"))
+                )
                 .subscribeOn(Schedulers.io())
-                .toObservable()
-                .flatMap(r -> Observable.fromIterable(r))
-                .map(r -> StockUpdate.create(r))
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError(error -> {
+                    Log.d("app", "doOnError ");
+                    Toast.makeText(this, "We couldn't reach internet - falling back to local data",
+                            Toast.LENGTH_SHORT)
+                            .show();
+                })
+                .observeOn(Schedulers.io())
+                .map(r -> r.getResults().getQuote())
+                .flatMap(Observable::fromIterable)
+                .map(StockUpdate::create)
                 .doOnNext(this::saveStockUpdate)
+                .onExceptionResumeNext(
+//                        v2(StorIOFactory.get(this)
+//                                .get()
+//                                .listOfObjects(StockUpdate.class)
+//                                .withQuery(Query.builder()
+//                                        .table(StockUpdateTable.TABLE)
+//                                        .orderBy("date DESC")
+//                                        .limit(50)
+//                                        .build())
+//                                .prepare()
+//                                .asRxObservable())
+//                                .take(1)
+//                                .flatMap(Observable::fromIterable)
+                )
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(stockUpdate -> {
-                    Log.d("app", "new update " + stockUpdate.toString());
+                    Log.d("APP", "New update " + stockUpdate.getStockSymbol());
                     stockDataAdapter.add(stockUpdate);
+                }, error -> {
+                    if (stockDataAdapter.getItemCount() == 0) {
+                    }
                 });
+
 
 
 //        Observable.just("hello! new text").subscribe(new Consumer<String>() {
